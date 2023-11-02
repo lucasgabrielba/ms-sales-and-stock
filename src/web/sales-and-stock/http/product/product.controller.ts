@@ -15,6 +15,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ProductDTO } from '../../../../sales-and-stock/DTO/ProductDTO';
 import { CreateProductPropsPrimitive, UpdateProductPropsPrimitive } from '../../../../sales-and-stock/domain/entities/Product';
 import { ProductService } from './product.service';
+import { SearchProductBy } from '../../utils/SearchProductBy';
 
 @Controller('product')
 @UseGuards(AuthGuard('jwt'))
@@ -23,7 +24,7 @@ export class ProductController {
 
   @Get()
   async findAll(@Res() res: Response, @Req() req: any): Promise<ProductDTO[]> {
-    const result = await this.service.listAllProduct(req.user.type);
+    const result = await this.service.listAllProduct(req.user);
 
     if (result.isFailure()) {
       res.status(400).json({ error: result.error.message });
@@ -81,13 +82,29 @@ export class ProductController {
     @Res() res: Response,
     @Req() req: any,
   ): Promise<ProductDTO> {
-    const result = await this.service.create(data, req.user.type);
-
+    const result = await this.service.create(data, req.user);
     if (result.isFailure()) {
       res.status(400).json({ error: result.error.message });
       return;
     }
     res.status(200).send(result.data.toDTO());
+    return;
+  }
+
+  @Post('/search')
+  async search(
+    @Body() data: SearchProductBy,
+    @Res() res: Response,
+    @Req() req: any,
+  ): Promise<ProductDTO> {
+    const result = await this.service.search(data, req.user);
+    console.log(result)
+    if (result.isFailure()) {
+      res.status(400).json({ error: result.error.message });
+      return;
+    }
+
+    res.status(200).send(result.data.map((i) => i.toDTO()));
     return;
   }
 

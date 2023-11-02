@@ -12,20 +12,41 @@ import { History } from '../interfaces/History';
 import { Item } from './Item';
 
 export interface CreateSalePropsPrimitive {
+  //customerData
+  customerName?: string;
+  customerCpfCnpj?: string;
+  customerEmail?: string;
+  customerWhatsapp?: string;
+  customerPhone?: string;
+  customerId?: string
+
+  //customerAddres
+  customerAddress?: string;
+  customerComplement?: string;
+  customerNumber?: string;
+  customerDistrict?: string;
+  customerCep?: string;
+  customerCity?: string;
+  customerState?: string;
+
   companyId: string
-  customerId: string
-  itemsId: string[]
+
+  items: { productId: string, quantity: number }[]
   value: number
-  isAcceptSuggestedValue: boolean
-  discount: number
-  status: EStatusSale
-  paid: number
-  history: History[]
+  isAcceptSuggestedValue?: boolean
+  discount?: number
+  paid?: number
+
+  user: string
 }
 
-export interface UpdateSalePropsPrimitive extends Partial<CreateSalePropsPrimitive> {}
+export interface UpdateSalePropsPrimitive extends Partial<CreateSalePropsPrimitive> {
+  status?: EStatusSale
+  history?: History
+}
 
 export interface CreateSaleProps {
+  number: number
   companyId: string
   customer: Customer
   items: Item[]
@@ -46,6 +67,9 @@ export class Sale extends Auditable {
 
   public static readonly LABEL: string = 'Sale';
 
+  get number(): number {
+    return this.props.number
+  }
   get companyId(): string {
     return this.props.companyId
   }
@@ -87,6 +111,7 @@ export class Sale extends Auditable {
       status: props.status,
       paid: props.paid,
       history: props.history,
+      number: props.number,
 
       createdAt: new Date(),
       updatedAt: undefined,
@@ -114,6 +139,7 @@ export class Sale extends Auditable {
       status: props.status,
       paid: props.paid,
       history: props.history,
+      number: props.number,
 
       createdAt: props.createdAt ? new Date(props.createdAt) : undefined,
       updatedAt: props.updatedAt ? new Date(props.updatedAt) : undefined,
@@ -140,6 +166,7 @@ export class Sale extends Auditable {
       discount: Joi.number().optional(),
       status: Joi.string().required(),
       paid: Joi.number().required(),
+      number: Joi.number().required(),
 
       createdAt: Joi.object().instance(Date).required(),
       updatedAt: Joi.object().instance(Date).optional(),
@@ -167,6 +194,7 @@ export class Sale extends Auditable {
       discount: this.discount,
       status: this.status,
       paid: this.paid,
+      number: this.number,
       history: this.history,
 
       createdAt: this.createdAt.toISOString(),

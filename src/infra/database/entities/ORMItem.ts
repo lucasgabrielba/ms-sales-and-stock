@@ -15,12 +15,17 @@ export class ORMItem extends ORMBase {
   @Column({ nullable: true })
   quantity: number;
 
+  @Column({ nullable: true })
+  value: number;
+
+
   static import(instance: Item): ORMItem {
     const entity = new ORMItem();
     entity.id = instance.id;
 
     entity.product = ORMProduct.import(instance.product)
     entity.quantity = instance.quantity
+    entity.value = instance.value
 
     entity.createdAt = instance.createdAt;
     entity.updatedAt = instance.updatedAt;
@@ -35,6 +40,7 @@ export class ORMItem extends ORMBase {
 
       product: this.product.export().toDTO(),
       quantity: this.quantity,
+      value: this.value,
 
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt ? this.updatedAt.toISOString() : null,

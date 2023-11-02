@@ -16,11 +16,13 @@ export interface CreateItemPropsPrimitive {
 export interface UpdateItemPropsPrimitive {
   quantity?: number;
   productId: string;
+  value: number;
 }
 
 export interface CreateItemProps {
   quantity: number;
   product: Product;
+  value: number;
 }
 
 export interface ItemProps extends CreateItemProps, AuditableProps {}
@@ -38,6 +40,9 @@ export class Item extends Auditable {
   get quantity(): number {
     return this.props.quantity
   }
+  get value(): number {
+    return this.props.quantity
+  }
 
   static create(props: CreateItemProps): Result<Item> {
     const validated = Item.validate({
@@ -45,12 +50,12 @@ export class Item extends Auditable {
 
       product: props.product,
       quantity: props.quantity,
+      value: props.value,
 
       createdAt: new Date(),
       updatedAt: undefined,
       deletedAt: undefined,
     });
-
     if (validated.isFailure()) {
       return Result.fail(validated.error);
     }
@@ -65,6 +70,7 @@ export class Item extends Auditable {
 
       product: Product.reconstitute(props.product).data,
       quantity: props.quantity,
+      value: props.value,
 
       createdAt: props.createdAt ? new Date(props.createdAt) : undefined,
       updatedAt: props.updatedAt ? new Date(props.updatedAt) : undefined,
@@ -82,8 +88,9 @@ export class Item extends Auditable {
     const schema = {
       id: Joi.string().uuid().required(),
 
-      Product: Joi.object().instance(Product).required(),
+      product: Joi.object().instance(Product).required(),
       quantity: Joi.number().required(),
+      value: Joi.number().required(),
 
       createdAt: Joi.object().instance(Date).required(),
       updatedAt: Joi.object().instance(Date).optional(),
@@ -105,6 +112,7 @@ export class Item extends Auditable {
 
       product: this.product.toDTO(),
       quantity: this.quantity,
+      value: this.value,
 
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt ? this.updatedAt.toISOString() : null,

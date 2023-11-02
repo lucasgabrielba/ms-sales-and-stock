@@ -28,7 +28,7 @@ export class ProductRepository
   async findById(id: string): Promise<Result<Product>> {
     const result = await this.findOne({
       where: { id: id },
-      relations: ['address'],
+
     });
     if (!result) {
       return Result.fail(new Error('not found'));
@@ -41,7 +41,7 @@ export class ProductRepository
     try {
       const result = await this.findOne({
         where: where,
-        relations: ['address'],
+
       });
       if (!result) {
         return Result.fail(new Error('not found'));
@@ -53,14 +53,14 @@ export class ProductRepository
       return Result.fail(error);
     }
   }
-  async findEntity(): Promise<Result<Product[]>> {
-    const result = await this.find({ relations: ['address'] });
+  async findEntity(where): Promise<Result<Product[]>> {
+    const result = await this.find({ where: where });
     const results = result.map((Product) => Product.export());
     return Result.ok(results);
   }
 
   async filter(where: object): Promise<Result<Product[]>> {
-    const result = await this.find({ ...where, relations: ['address'] });
+    const result = await this.find({ ...where, });
     const results = result.map((Product) => Product.export());
     return Result.ok(results);
   }
@@ -69,7 +69,7 @@ export class ProductRepository
     try {
       const entity = await this.findOne({
         where: { id: instance.id.toString() },
-        relations: ['address'],
+
       });
 
       if (!entity) return Result.fail(new Error('invalid'));

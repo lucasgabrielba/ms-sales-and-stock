@@ -15,4 +15,5 @@ export interface SaleDTO extends AuditableDTO {
   status: EStatusSale
   paid: number
   history: History[]
+  number: number
 }

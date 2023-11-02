@@ -24,8 +24,8 @@ export class SaleDomainService extends AbstractDomainService<
     return Result.ok<Sale>(created.data);
   }
 
-  async find(): Promise<Result<Sale[]>> {
-    const fetched = await this.repository.findEntity();
+  async find(where?): Promise<Result<Sale[]>> {
+    const fetched = await this.repository.findEntity(where);
 
     if (fetched.isFailure()) {
       return Result.fail(fetched.error);

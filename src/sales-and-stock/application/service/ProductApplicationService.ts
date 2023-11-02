@@ -8,6 +8,9 @@ import {
   UpdateProductPropsPrimitive,
 } from '../../domain/entities/Product';
 import { ProductDTO } from '../../DTO/ProductDTO';
+import { MemberPayload } from '../../../web/sales-and-stock/utils/MemberPayload';
+import { ILike } from 'typeorm';
+import { SearchProductBy } from '../../../web/sales-and-stock/utils/SearchProductBy';
 
 export class ProductApplicationService extends AbstractApplicationService<
   Product,
@@ -19,7 +22,12 @@ export class ProductApplicationService extends AbstractApplicationService<
     super(manager);
   }
 
-  async create(data: CreateProductPropsPrimitive): Promise<Result<Product>> {
+  async createEntity(data: CreateProductPropsPrimitive, member: MemberPayload): Promise<Result<Product>> {
+    data = {
+      ...data,
+      companyId: member.companyId,
+    }
+
     const result = await this.manager.createAndSave(data);
 
     if (result.isFailure()) {
@@ -92,8 +100,8 @@ export class ProductApplicationService extends AbstractApplicationService<
     return Result.ok<Product>(fetched.data);
   }
 
-  async all(): Promise<Result<Product[]>> {
-    const result = await this.manager.find();
+  async all(member: MemberPayload): Promise<Result<Product[]>> {
+    const result = await this.manager.find({ companyId: member.companyId });
     return result;
   }
 
@@ -109,6 +117,58 @@ export class ProductApplicationService extends AbstractApplicationService<
     }
 
     return Result.ok(fetched.data);
+  }
+
+
+  async search(data: SearchProductBy, member: MemberPayload): Promise<Result<Product[]>> {
+    let where: any = { where: { companyId: member.companyId } }
+
+    if (data.code && data.code !== '') {
+      where = {
+        where: {
+          productCode: data.code,
+          companyId: member.companyId
+        }
+      }
+    }
+
+    if (data.brand && data.brand !== '') {
+      where = {
+        where: {
+          brand: ILike(`%${data.brand}%`),
+          companyId: member.companyId
+        }
+      }
+    }
+
+    if (data.name && data.name !== '') {
+      where = {
+        where: {
+          name: ILike(`%${data.name}%`),
+          companyId: member.companyId
+        }
+      }
+    }
+
+    if (data.model && data.model !== '') {
+      where = {
+        where: {
+          model: ILike(`%${data.model}%`),
+          companyId: member.companyId
+        }
+      }
+    }
+
+    const result = await this.manager.filter({
+      ...where
+    });
+
+    if (result.isFailure()) {
+      return Result.fail(result.error);
+    }
+
+    return result;
+
   }
 
   getModelLabel(): string {

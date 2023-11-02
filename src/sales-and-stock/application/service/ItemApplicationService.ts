@@ -21,14 +21,16 @@ export class ItemApplicationService extends AbstractApplicationService<
 
   async create(data: CreateItemPropsPrimitive): Promise<Result<Item>> {
     const product = await this.productAppService.getById(data.productId);
-
     if (product.isFailure()) {
       return Result.fail(product.error)
     }
 
+    const value = product.data.salePrice * data.quantity;
+
     const createData = {
       product: product.data,
       quantity: data.quantity,
+      value
     }
 
     const result = await this.manager.createAndSave(createData);

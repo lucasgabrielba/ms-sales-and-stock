@@ -18,6 +18,7 @@ import {
   UpdateSalePropsPrimitive,
 } from '../../../../sales-and-stock/domain/entities/Sale';
 import { SaleService } from './sale.service';
+import { SearchBy } from '../../utils/SearchBy';
 
 @Controller('sale')
 @UseGuards(AuthGuard('jwt'))
@@ -26,7 +27,7 @@ export class SaleController {
 
   @Get()
   async findAll(@Res() res: Response, @Req() req: any): Promise<SaleDTO[]> {
-    const result = await this.service.listAllSale(req.user.type);
+    const result = await this.service.listAllSale(req.user);
 
     if (result.isFailure()) {
       res.status(400).json({ error: result.error.message });
@@ -62,21 +63,37 @@ export class SaleController {
     return;
   }
 
-  // @Post('/findby')
-  // async findBy(
-  //   @Body() data: FindSaleBy,
-  //   @Res() res: Response,
-  //   @Req() req: any,
-  // ): Promise<SaleDTO[]> {
-  //   const result = await this.service.findBy(data, req.user);
+  @Get('/number/:number')
+  async getByNumber(
+    @Param('number') number: string,
+    @Res() res: Response,
+    @Req() req: any,
+  ): Promise<SaleDTO> {
+    const result = await this.service.getByNumber(number, req.user);
+    if (result.isFailure()) {
+      res.status(400).json({ error: result.error.message });
+      return;
+    }
 
-  //   if (result.isFailure()) {
-  //     res.status(400).json({ error: result.error.message });
-  //     return;
-  //   }
-  //   res.status(200).send(result.data.map((sale) => sale.toDTO()));
-  //   return;
-  // }
+    res.status(200).send(result.data.toDTO());
+    return;
+  }
+
+  @Post('/search')
+  async search(
+    @Body() data: SearchBy,
+    @Res() res: Response,
+    @Req() req: any,
+  ): Promise<SaleDTO[]> {
+    const result = await this.service.search(data, req.user);
+
+    if (result.isFailure()) {
+      res.status(400).json({ error: result.error.message });
+      return;
+    }
+    res.status(200).send(result.data.map((sale) => sale.toDTO()));
+    return;
+  }
 
   @Post()
   async create(
@@ -101,7 +118,7 @@ export class SaleController {
     @Res() res: Response,
     @Req() req: any,
   ): Promise<SaleDTO> {
-    const result = await this.service.update(id, data, req.user.type);
+    const result = await this.service.update(id, data, req.user);
 
     if (result.isFailure()) {
       res.status(400).json({ error: result.error.message });

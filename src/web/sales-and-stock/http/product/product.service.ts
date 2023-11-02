@@ -4,6 +4,7 @@ import { ProductEntrypoint } from '../../entrypoint/product.entrypoint';
 import { MemberPayload } from '../../utils/MemberPayload';
 import { ProductApplicationService } from '../../../../sales-and-stock/application/service/ProductApplicationService';
 import { Product, CreateProductPropsPrimitive, UpdateProductPropsPrimitive } from '../../../../sales-and-stock/domain/entities/Product';
+import { SearchProductBy } from '../../utils/SearchProductBy';
 
 @Injectable()
 export class ProductService {
@@ -14,8 +15,7 @@ export class ProductService {
   }
 
   async listAllProduct(member: MemberPayload): Promise<Result<Product[]>> {
-    member;
-    const result = await this.applicationService.all();
+    const result = await this.applicationService.all(member);
     return result;
   }
 
@@ -42,8 +42,15 @@ export class ProductService {
     member: MemberPayload,
   ): Promise<Result<Product>> {
     member;
-    const result = await this.applicationService.create(data);
+    const result = await this.applicationService.createEntity(data, member);
     return result;
+  }
+
+  async search(
+    data: SearchProductBy,
+    member: MemberPayload,
+  ): Promise<Result<Product[]>> {
+    return await this.applicationService.search(data, member);
   }
 
   async update(

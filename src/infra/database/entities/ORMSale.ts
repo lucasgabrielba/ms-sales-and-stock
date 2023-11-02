@@ -2,7 +2,7 @@
 import { ORMItem } from './ORMItem';
 import { ORMBase } from './ORMBase';
 import { Injectable } from '@nestjs/common';
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToMany, JoinTable, ManyToOne, JoinColumn } from 'typeorm';
 import { SaleDTO } from '../../../sales-and-stock/DTO/SaleDTO';
 import { Sale } from '../../../sales-and-stock/domain/entities/Sale';
 import { EStatusSale } from '../../../sales-and-stock/domain/enum/EStatusSale';
@@ -17,6 +17,9 @@ export class ORMSale extends ORMBase {
 
   @Column({ nullable: false })
   value: number;
+
+  @Column({ nullable: false })
+  number: number;
 
   @Column({ nullable: true })
   isAcceptSuggestedValue: boolean;
@@ -38,10 +41,12 @@ export class ORMSale extends ORMBase {
   })
   history: History[];
 
-  @OneToMany(() => ORMItem, (item) => item.id)
+  @ManyToMany(() => ORMItem, (item) => item.id)
+  @JoinTable()
   items: ORMItem[];
 
-  @OneToMany(() => ORMCustomer, (customer) => customer.id)
+  @ManyToOne(() => ORMCustomer, (customer) => customer.id)
+  @JoinColumn({ name: 'customer_id' })
   customer: ORMCustomer;
 
   static import(instance: Sale): ORMSale {
@@ -57,6 +62,7 @@ export class ORMSale extends ORMBase {
     entity.items = instance.items.map((i) => ORMItem.import(i));
     entity.customer = ORMCustomer.import(instance.customer)
     entity.history = instance.history;
+    entity.number = instance.number;
 
     entity.createdAt = instance.createdAt;
     entity.updatedAt = instance.updatedAt;
@@ -78,6 +84,7 @@ export class ORMSale extends ORMBase {
       items: this.items.map((i) => i.export().toDTO()),
       customer: this.customer.export().toDTO(),
       history: this.history,
+      number: this.number,
 
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt ? this.updatedAt.toISOString() : null,

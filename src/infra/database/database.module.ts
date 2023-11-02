@@ -29,7 +29,7 @@ import { ORMSale } from './entities/ORMSale';
           ORMProduct,
           ORMSale
         ],
-        synchronize: false,
+        synchronize: true,
       }),
       inject: [ConfigService],
     }),
