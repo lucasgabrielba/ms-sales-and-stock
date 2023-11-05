@@ -98,7 +98,7 @@ export class ProductController {
     @Req() req: any,
   ): Promise<ProductDTO> {
     const result = await this.service.search(data, req.user);
-    console.log(result)
+
     if (result.isFailure()) {
       res.status(400).json({ error: result.error.message });
       return;

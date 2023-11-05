@@ -72,9 +72,9 @@ export class SaleApplicationService extends AbstractApplicationService<
     delete data.items;
 
     const theLastCreatedSale = await this.find({
-      where: { companyId: data.companyId },
+      where: { companyId: data.companyId }
     })
-
+    console.log(theLastCreatedSale)
     const saleNumber = theLastCreatedSale?.data?.number ?
       theLastCreatedSale.data.number + 1 : 1
 
@@ -128,9 +128,11 @@ export class SaleApplicationService extends AbstractApplicationService<
     if (data.history) {
       statusHistory = data.history
     }
-
+    console.log(data)
     const updateData = {
       ...entity.data.toDTO(),
+      status: data.status ? data.status : entity.data.status,
+      paid: data.paid ? entity.data.paid + data.paid : entity.data.paid,
       history: [...entity.data.history, statusHistory],
     };
 

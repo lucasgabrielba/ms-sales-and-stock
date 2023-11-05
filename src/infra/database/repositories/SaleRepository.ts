@@ -72,7 +72,7 @@ export class SaleRepository
       ...where,
       relations: ['customer', 'customer.address', 'items', 'items.product'],
       order: {
-        createdAt: 'ASC'
+        number: 'ASC'
       },
     });
     const results = result.map((Sale) => Sale.export());
