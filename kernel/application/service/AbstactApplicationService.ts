@@ -82,7 +82,8 @@ export abstract class AbstractApplicationService<
     return Result.ok<Model>(fetched.data);
   }
 
-  async create(data: CreateProps): Promise<Result<Model>> {
+  async create(data: CreateProps, member): Promise<Result<Model>> {
+    member
     const created = await (this.manager as any).createAndSave(data);
 
     if (created.isFailure()) {

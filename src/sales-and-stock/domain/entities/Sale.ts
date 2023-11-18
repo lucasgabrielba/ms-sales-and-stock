@@ -12,6 +12,7 @@ import { History } from '../interfaces/History';
 import { Item } from './Item';
 
 export interface CreateSalePropsPrimitive {
+  access_token?: string
   //customerData
   customerName?: string;
   customerCpfCnpj?: string;
@@ -41,6 +42,7 @@ export interface CreateSalePropsPrimitive {
 }
 
 export interface UpdateSalePropsPrimitive extends Partial<CreateSalePropsPrimitive> {
+  access_token?: string
   status?: EStatusSale
   history?: History
 }

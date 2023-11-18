@@ -14,6 +14,7 @@ import { SaleDomainService } from '../../domain/service/SaleDomainService';
 import { MemberPayload } from '../../../web/sales-and-stock/utils/MemberPayload';
 import { SearchBy } from '../../../web/sales-and-stock/utils/SearchBy';
 import { ILike } from 'typeorm';
+import { NotificationApplicationService } from './NotificationApplicationService';
 
 export class SaleApplicationService extends AbstractApplicationService<
   Sale,
@@ -25,11 +26,12 @@ export class SaleApplicationService extends AbstractApplicationService<
     readonly manager: SaleDomainService,
     private readonly customerAppService: CustomerApplicationService,
     private readonly itemAppService: ItemApplicationService,
+    private readonly notificationAppService: NotificationApplicationService,
   ) {
     super(manager);
   }
 
-  async create(data: CreateSalePropsPrimitive): Promise<Result<Sale>> {
+  async create(data: CreateSalePropsPrimitive, member: MemberPayload): Promise<Result<Sale>> {
     let customer = await this.customerAppService.getById(data.customerId);
     if (customer.isFailure()) {
       customer = await this.customerAppService.create({
@@ -74,7 +76,7 @@ export class SaleApplicationService extends AbstractApplicationService<
     const theLastCreatedSale = await this.find({
       where: { companyId: data.companyId }
     })
-    console.log(theLastCreatedSale)
+
     const saleNumber = theLastCreatedSale?.data?.number ?
       theLastCreatedSale.data.number + 1 : 1
 
@@ -99,6 +101,17 @@ export class SaleApplicationService extends AbstractApplicationService<
     if (result.isFailure()) {
       return Result.fail(result.error);
     }
+
+    await this.notificationAppService.createNotification(
+      {
+        message: `Venda de nº ${result.data.number} criada.`,
+        type: 'vendas-e-estoque/vendas',
+        number: result.data.number.toString(),
+        companyId: member.companyId,
+      },
+      data.access_token,
+    )
+
 
     return result;
   }
@@ -159,6 +172,33 @@ export class SaleApplicationService extends AbstractApplicationService<
       );
     }
 
+    if (data.status) {
+      await this.notificationAppService.createNotification(
+        {
+          message: `Venda de nº ${instance.number} alterado para: ${instance.status}.`,
+          type: 'vendas-e-estoque/vendas',
+          number: instance.number.toString(),
+          companyId: member.companyId,
+        },
+        data.access_token,
+      )
+    }
+
+    if (data.paid) {
+      const message = instance.paid === instance.value ?
+        `Venda de nº ${instance.number} foi paga.` :
+        `Venda de nº ${instance.number} recebeu um pagamento parcial.`
+
+      await this.notificationAppService.createNotification(
+        {
+          message: message,
+          type: 'vendas-e-estoque/vendas',
+          number: instance.number.toString(),
+          companyId: member.companyId,
+        },
+        data.access_token,
+      )
+    }
 
     return Result.ok(instance);
 
@@ -190,7 +230,7 @@ export class SaleApplicationService extends AbstractApplicationService<
     if (data.cpfCnpj && data.cpfCnpj !== '') {
       where = {
         where: {
-          customer: { cpfCnpj: ILike(`%${data.cpfCnpj}%`) },
+          customer: { cpfCnpj: ILike(`% ${data.cpfCnpj}% `) },
           companyId: member.companyId
         }
       }
@@ -199,7 +239,7 @@ export class SaleApplicationService extends AbstractApplicationService<
     if (data.name && data.name !== '') {
       where = {
         where: {
-          customer: { name: ILike(`%${data.name}%`) },
+          customer: { name: ILike(`% ${data.name}% `) },
           companyId: member.companyId
         }
       }
@@ -208,7 +248,7 @@ export class SaleApplicationService extends AbstractApplicationService<
     if (data.phone && data.phone !== '') {
       where = {
         where: {
-          customer: { phone: ILike(`%${data.phone}%`) },
+          customer: { phone: ILike(`% ${data.phone}% `) },
           companyId: member.companyId
         }
       }

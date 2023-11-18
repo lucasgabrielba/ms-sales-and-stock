@@ -53,7 +53,7 @@ export class SaleService {
     member: MemberPayload,
   ): Promise<Result<Sale>> {
     member;
-    const result = await this.applicationService.create(data);
+    const result = await this.applicationService.create(data, member);
     return result;
   }
 

@@ -4,6 +4,7 @@ import { SaleRepository } from '../../../infra/database/repositories/SaleReposit
 import { CustomerEntrypoint } from './customer.entrypoint';
 import { SaleApplicationService } from '../../../sales-and-stock/application/service/SaleApplicationService';
 import { ItemEntrypoint } from './item.entrypoint';
+import { NotificationApplicationService } from '../../../sales-and-stock/application/service/NotificationApplicationService';
 
 @Injectable()
 export class SaleEntrypoint {
@@ -17,13 +18,15 @@ export class SaleEntrypoint {
     if (!SaleEntrypoint.instance) {
       const customerAppService = customerEntrypoint.getApplicationService();
       const itemAppService = itemEntrypoint.getApplicationService();
+      const notificationAppService = new NotificationApplicationService
 
       const domainService = new SaleDomainService(repository);
 
       SaleEntrypoint.instance = new SaleApplicationService(
         domainService,
         customerAppService,
-        itemAppService
+        itemAppService,
+        notificationAppService
       );
     }
   }
