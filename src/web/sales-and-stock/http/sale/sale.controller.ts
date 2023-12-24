@@ -102,7 +102,7 @@ export class SaleController {
     @Req() req: any,
   ): Promise<SaleDTO> {
     const result = await this.service.create(data, req.user.type);
-
+    console.log(result)
     if (result.isFailure()) {
       res.status(400).json({ error: result.error.message });
       return;
